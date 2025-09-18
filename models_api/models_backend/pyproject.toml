@@ -1,0 +1,79 @@
+# Configuração do Poetry, uma ferramenta de gerenciamento de dependências e pacotes para Python.
+[tool.poetry]
+name = "models-backend"  # Nome do projeto.
+version = "0.1.0"  # Versão inicial do projeto.
+description = ""  # Descrição do projeto (pode ser preenchida posteriormente).
+authors = ["Cristiano Lima Oliveira <clo@cin.ufpe.br>"]  # Lista de autores do projeto.
+readme = "README.md"  # Arquivo de documentação principal.
+
+# Dependências do projeto, especificadas com suas versões compatíveis.
+[tool.poetry.dependencies]
+python = "^3.10"  # Define a versão mínima do Python compatível com o projeto.
+fastapi = {extras = ["standard"], version = "^0.115.4"}  # Framework para desenvolvimento de APIs rápidas e assíncronas.
+pydantic = {extras = ["email"], version = "^2.9.2"}  # Biblioteca para validação de dados e tipagem com suporte a e-mails.
+pwdlib = {extras = ["argon2"], version = "^0.2.1"}  # Biblioteca para manipulação de senhas, incluindo suporte a Argon2.
+python-multipart = "^0.0.20"  # Necessária para lidar com uploads de arquivos no FastAPI.
+requests-toolbelt = "0.10.1"  # Conjunto de ferramentas adicionais para a biblioteca requests.
+psycopg2-binary = "^2.9.10"  # Driver para conexão com bancos de dados PostgreSQL.
+pydantic-settings = "^2.6.1"  # Extensão do Pydantic para gerenciamento de configurações do projeto.
+firebase-admin = "6.5.0"  # SDK para integração com Firebase Admin (autenticação, banco de dados, etc.).
+sqlalchemy = "^2.0.36"  # ORM para manipulação de bancos de dados relacionais.
+pyrebase4 = "4.6.0"  # Biblioteca para integração com Firebase (autenticação, banco de dados em tempo real, etc.).
+urllib3 = "1.26.15"  # Biblioteca para manipulação de conexões HTTP com maior controle e segurança.
+alembic = "^1.14.0"  # Ferramenta de migração para SQLAlchemy, usada para versionamento do banco de dados.
+pandas = "^2.2.3"  # Biblioteca para análise e manipulação de dados em tabelas.
+pyjwt = "^2.9.0"  # Biblioteca para manipulação de JSON Web Tokens (JWT), usada para autenticação.
+numpy = "^2.1.3"  # Biblioteca para operações matemáticas e manipulação de arrays eficientes.
+streaming-form-data = "1.19.0"  # Biblioteca para manipulação de upload de arquivos em streams.
+scikit-learn = "^1.6.1"
+torch = "^2.6.0"
+torchvision = "^0.21.0"
+opencv-python = "^4.11.0.86"
+httpx = "^0.28.1"  # Cliente HTTP assíncrono para testes e consumo de APIs.
+
+# Dependências utilizadas apenas em ambiente de desenvolvimento.
+[tool.poetry.group.dev.dependencies]
+testcontainers = "^4.8.2"  # Biblioteca para criação de containers Docker para testes automatizados.
+factory-boy = "^3.3.1"  # Biblioteca para criação de dados fictícios para testes.
+pytest-cov = "^5.0.0"  # Plugin do Pytest para medir cobertura de código nos testes.
+freezegun = "^1.5.1"  # Biblioteca para simular datas e horários em testes.
+taskipy = "^1.14.0"  # Ferramenta para automatização de tarefas via Poetry.
+pytest = "^8.3.3"  # Framework para criação e execução de testes unitários e funcionais.
+ruff = "^0.7.1"  # Ferramenta de linting e formatação de código para Python.
+
+# Definição de tarefas automatizadas usando Taskipy.
+[tool.taskipy.tasks]
+uvicorn_main = 'uvicorn models_backend.app:app --host 0.0.0.0 --port 8100'  # Inicia o servidor FastAPI com Uvicorn.
+run = 'fastapi dev models_backend/app.py'  # Executa o servidor FastAPI no modo desenvolvimento.
+test = 'pytest --cov=models_backend -vv'  # Roda os testes unitários e gera um relatório de cobertura de código.
+format = 'ruff check . --fix ; ruff format .'  # Aplica correções automáticas e formata o código com Ruff.
+lint = 'ruff check . ; ruff check . --diff'  # Verifica problemas de linting no código e exibe as diferenças.
+post_test = 'coverage html'  # Gera um relatório de cobertura de código em formato HTML.
+pre_test = 'task lint'  # Executa a verificação de lint antes de rodar os testes.
+
+# Configuração do Pytest, utilizado para testes automatizados.
+[tool.pytest.ini_options]
+addopts = '-p no:warnings'  # Evita que avisos sejam exibidos nos testes.
+pythonpath = "."  # Define o diretório raiz do projeto como caminho de referência para importações.
+
+# Configuração do Ruff, ferramenta de linting e formatação para Python.
+[tool.ruff]
+extend-exclude = ['migrations', 'other_codes', 'notebooks', 'postgres-data']  # Diretórios ignorados pelo Ruff.
+line-length = 79  # Define o comprimento máximo de linha para 79 caracteres.
+
+[tool.ruff.lint]
+ignore = ['PLR0913', 'PLR0917']  # Regras específicas ignoradas pelo Ruff.
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']  # Lista de regras ativas para linting.
+preview = true  # Ativa recursos experimentais.
+
+[tool.ruff.format]
+quote-style = 'single'  # Define o estilo de aspas como aspas simples.
+preview = true  # Ativa recursos experimentais de formatação.
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
+# Configuração do sistema de build do Poetry.
+[build-system]
+requires = ["poetry-core"]  # Dependência necessária para construir o pacote.
+build-backend = "poetry.core.masonry.api"  # Define o backend responsável pelo processo de build do projeto.

@@ -1,0 +1,76 @@
+services:
+  postgresql-database_deep_learning:
+    image: postgres
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 8G
+    volumes:
+      - ../init-scripts:/docker-entrypoint-initdb.d:ro
+      - ../../postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    expose:
+      - "5432"
+    ports:
+      - "5436:5432"
+    networks:
+      deep_learning_backend_subnet:
+        ipv4_address: ${POSTGRES_IP}
+
+  pgadmin_deep_learning:
+    image: dpage/pgadmin4
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 8G
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    expose:
+      - "80"
+    ports:
+      - "5437:80"
+    depends_on:
+      - postgresql-database_deep_learning
+    networks:
+      deep_learning_backend_subnet:
+        ipv4_address: ${PGADMIN_IP}
+
+  backend_deep_learning:
+    image: python:3.12.7
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 8G
+    expose:
+      - "8090"
+    ports:
+      - "5438:8090"
+    volumes:
+      - ../../deep_learning_backend:/home
+    working_dir: /home
+    command: >
+      bash -c "apt-get update
+      && apt-get upgrade -y
+      && apt-get install -y build-essential
+      && apt-get install -y libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev liblzma-dev make gcc libgl1
+      && apt-get install -y libpython3-dev libpq-dev python3-psycopg2
+      && rm -rf /var/lib/apt/lists/*
+      && pip install --upgrade pip
+      && yes|pip install -r requirements-dev.txt
+      && tail -f /dev/null"
+    depends_on:
+      - postgresql-database_deep_learning
+    networks:
+      deep_learning_backend_subnet:
+        ipv4_address: ${BACKEND_IP}
+
+networks:
+  deep_learning_backend_subnet:
+    external: true
